@@ -1,4 +1,5 @@
 ﻿using LLamaNET;
+using LLamaNET.Sampler;
 
 internal class Program {
     private static void Main(string[] args) {
@@ -14,7 +15,7 @@ internal class Program {
 
         using var model = LLMModel.FromFile(filepath, param);
         using var context = model.CreateContext();
-        var sampler = new LLamaNET.Sampler.TopSampler() {
+        TopSampler sampler = new() {
             RepeatPenalty = 1.1f,
             PresencePenalty = 0f,
             FrequencyPenalty = 1f,
@@ -41,16 +42,11 @@ internal class Program {
             prompt.Append(OutputPrefix);
             Console.Write(OutputPrefix);
 
-            var words = inferencer.InferenceText(500);
-            foreach(var word in words) {
+            foreach(var word in inferencer.InferenceText(500)) {
                 Console.Write(word.Replace("\r", "\r\n"));
             }
             prompt.Append(InputPrefix);
             Console.Write(InputPrefix);
         }
-
-
-
-
     }
 }
