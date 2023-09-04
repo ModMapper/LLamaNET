@@ -39,26 +39,34 @@ public class TextInferencer : TokenInferencer
             var span = ((LLamaContext)Session).DetokenizeSpan(token);
             index += decoder.GetChars(span, buffer.AsSpan(index), false);
 
-            int find = buffer.AsSpan().IndexOf(anti);
-            if (find != -1)
-            {   // 안티 프롬프트 발견
-                yield return new(buffer.AsSpan(0, find));
-                yield break;
-            }
-
-            if (anti.Length < index)
-            {
-                int count = index - anti.Length;
+            if(anti.Length == 0) {
                 // 서로게이트 확인
-                while (0 < count && char.IsHighSurrogate(buffer[count - 1]))
-                    count--;
+                while (0 < index && char.IsHighSurrogate(buffer[index - 1]))
+                    index--;
                 // 서로게이트를 제외한 크기가 0인경우 다음 추론 
-                if (count == 0) continue;
-                // 프롬프트 확인에 필요없는 문자열 모두 반환
-                yield return new(buffer.AsSpan(0, count));
-                // 남은 프롬프트를 이동한다.
-                buffer.AsSpan(count, index - count).CopyTo(buffer);
-                index -= count;
+                if (index == 0) continue;
+                yield return new(buffer.AsSpan(0, index));
+                index = 0;
+            } else {
+                int find = buffer.AsSpan().IndexOf(anti);
+                if (find != -1) {   // 안티 프롬프트 발견
+                    yield return new(buffer.AsSpan(0, find));
+                    yield break;
+                }
+
+                if (anti.Length < index) {
+                    int count = index - anti.Length;
+                    // 서로게이트 확인
+                    while (0 < count && char.IsHighSurrogate(buffer[count - 1]))
+                        count--;
+                    // 서로게이트를 제외한 크기가 0인경우 다음 추론 
+                    if (count == 0) continue;
+                    // 프롬프트 확인에 필요없는 문자열 모두 반환
+                    yield return new(buffer.AsSpan(0, count));
+                    // 남은 프롬프트를 이동한다.
+                    buffer.AsSpan(count, index - count).CopyTo(buffer);
+                    index -= count;
+                }
             }
         }
         // 남은 토큰을 전부 반환한다.
