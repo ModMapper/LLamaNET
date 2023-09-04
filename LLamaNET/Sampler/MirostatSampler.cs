@@ -2,7 +2,7 @@
 
 using LLamaNET.LLamaCpp;
 
-/// <summary>Mirostat V2 알고리즘을 사용하는 샘플러입니다.</summary>
+/// <summary>Mirostat 알고리즘을 사용하는 샘플러입니다.</summary>
 public class MirostatSampler : PenaltySampler {
     private float mu;
 
