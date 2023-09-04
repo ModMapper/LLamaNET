@@ -1,5 +1,6 @@
 ## LLamaNET
 **.NET 7 (Test version)**
+**Required llamacpp library**
 
 ***Example***
 ```C#
