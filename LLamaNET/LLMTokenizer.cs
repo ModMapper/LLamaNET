@@ -40,9 +40,9 @@ public struct LLMTokenizer {
     /// <param name="tokens">문자열을 가져올 토큰들입니다.</param>
     /// <returns>해당 토큰에 대한 문자열입니다.</returns>
     public readonly string Detokenize(ReadOnlySpan<LLMToken> tokens) {
-        MemoryStream stream = new();
+        using MemoryStream stream = new();
         foreach (var token in tokens)
-            stream.Write(tokenizer.DetokenizeUTF8(token));
+            stream.Write(tokenizer.DetokenizeSpan(token));
         return Encoding.UTF8.GetString(stream.GetBuffer(), 0, (int)stream.Length);
     }
 
@@ -50,9 +50,9 @@ public struct LLMTokenizer {
     /// <param name="tokens">문자열을 가져올 토큰 열거입니다.</param>
     /// <returns>해당 토큰에 대한 문자열입니다.</returns>
     public readonly string Detokenize(IEnumerable<LLMToken> tokens) {
-        MemoryStream stream = new();
+        using MemoryStream stream = new();
         foreach (var token in tokens)
-            stream.Write(tokenizer.DetokenizeUTF8(token));
+            stream.Write(tokenizer.DetokenizeSpan(token));
         return Encoding.UTF8.GetString(stream.GetBuffer(), 0, (int)stream.Length);
     }
 }

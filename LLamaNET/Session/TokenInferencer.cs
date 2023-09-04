@@ -1,4 +1,5 @@
-﻿namespace LLamaNET.Context;
+﻿namespace LLamaNET.Session;
+
 using LLamaNET.LLamaCpp;
 
 using System;
@@ -7,48 +8,27 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 
 /// <summary>토큰에 대한 추론을 진행하는 토큰 추론기입니다.</summary>
-public class TokenInferencer {
-    /// <summary>해당 컨텍스트에 대한 토큰 추론기를 생성합니다.</summary>
-    /// <param name="context">토큰 추론을 할 컨텍스트입니다.</param>
-    /// <param name="batchSize">한번에 연산을 진행할 배치 크기입니다.</param>
-    public TokenInferencer(LLamaContext context, int batchSize) {
-        Context = context;
-        Sampler = new Sampler.TopSampler();
-        Tokens = new LoopTokens(context, batchSize);
-        BatchSize = batchSize;
-    }
-
-    /// <summary>해당 컨텍스트에 대한 토큰 추론기를 생성합니다.</summary>
-    /// <param name="context">토큰 추론을 할 컨텍스트입니다.</param>
+public class TokenInferencer
+{
+    /// <summary>해당 세션에 대한 토큰 추론기를 생성합니다.</summary>
+    /// <param name="session">토큰 추론을 진행 할 세션입니다.</param>
     /// <param name="sampler">토큰 추론에 사용할 샘플러입니다.</param>
     /// <param name="batchSize">한번에 연산을 진행할 배치 크기입니다.</param>
-    public TokenInferencer(LLamaContext context, LLMSampler sampler, int batchSize) {
-        Context = context;
+    public TokenInferencer(LLMSession session, LLMSampler sampler, int batchSize)
+    {
+        Session = session;
         Sampler = sampler;
-        Tokens = new LoopTokens(context, batchSize);
         BatchSize = batchSize;
     }
 
-    /// <summary>해당 컨텍스트에 대한 토큰 추론기를 생성합니다.</summary>
-    /// <param name="context">토큰 추론을 할 컨텍스트입니다.</param>
-    /// <param name="sampler">토큰 추론에 사용할 샘플러입니다.</param>
-    /// <param name="tokens">토큰 추론에 사용할 토큰 저장소입니다.</param>
-    /// <param name="batchSize">한번에 연산을 진행할 배치 크기입니다.</param>
-    public TokenInferencer(LLamaContext context, LLMSampler sampler, LLMTokens tokens, int batchSize) {
-        Context = context;
-        Sampler = sampler;
-        Tokens = tokens;
-        BatchSize = batchSize;
-    }
+    /// <summary>추론이 진행될 세션입니다.</summary>
+    public LLMSession Session { get; }
 
-    /// <summary>라마 컨텍스트입니다.</summary>
-    protected LLamaContext Context { get; }
+    /// <summary>내부 컨텍스트입니다.</summary>
+    protected LLamaContext Context => (LLamaContext)Session;
 
     /// <summary>토큰 샘플링에 사용할 샘플러입니다.</summary>
     public LLMSampler Sampler { get; set; }
-
-    /// <summary>토큰이 저장된 토큰 저장소입니다.</summary>
-    public LLMTokens Tokens { get; set; }
 
     /// <summary>연산을 진행할 배치 크기입니다.</summary>
     public int BatchSize { get; }
@@ -64,16 +44,19 @@ public class TokenInferencer {
 
     /// <summary>토큰을 추론합니다.</summary>
     /// <returns>추론한 토큰의 열거입니다.</returns>
-    public IEnumerable<LLMToken> Inference() {
+    public IEnumerable<LLMToken> Inference()
+    {
         int index = 1;
-        Eval(Tokens, index);
-        index += Tokens.Length;
+        Eval(Session, index);
+        index += Session.Length;
         return _Infer();
 
-        IEnumerable<LLMToken> _Infer() {
-            while (true) {
-                LLMToken token = Sampler.Sample(Context, Tokens);
-                Tokens.Add(token);
+        IEnumerable<LLMToken> _Infer()
+        {
+            while (true)
+            {
+                LLMToken token = Sampler.Sample(Context, Session);
+                Session.Add(token);
                 if (token == LLMToken.TokenEOS) yield break;
                 index++;
                 yield return token;
@@ -92,10 +75,12 @@ public class TokenInferencer {
     /// <summary>주어진 토큰들에 대한 계산을 배치 크기로 실시합니다.</summary>
     /// <param name="tokens">계산할 토큰들입니다.</param>
     /// <param name="past">이전에 계산한 토큰의 수 입니다.</param>
-    protected void Eval(ReadOnlySpan<LLMToken> tokens, int past) {
+    protected void Eval(ReadOnlySpan<LLMToken> tokens, int past)
+    {
         int threads = Threads;
         int index;
-        for (index = 0; index < (tokens.Length - BatchSize); index += BatchSize) {
+        for (index = 0; index < tokens.Length - BatchSize; index += BatchSize)
+        {
             Context.Eval(tokens.Slice(index, BatchSize), past, threads);
             past += BatchSize;
         }

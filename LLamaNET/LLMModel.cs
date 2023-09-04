@@ -49,4 +49,9 @@ public class LLMModel : IDisposable {
     /// <returns>모델에 대한 토크나이저입니다.</returns>
     public LLMTokenizer GetTokenizer()
         => new(Model);
+
+    /// <summary>모델의 내부 모델을 가져옵니다.</summary>
+    /// <param name="context">내부 모델을 가져올 모델입니다.</param>
+    public static explicit operator LLamaModel(LLMModel model)
+        => model.Model;
 }

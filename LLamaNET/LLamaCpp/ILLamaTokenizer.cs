@@ -5,5 +5,5 @@ public interface ILLamaTokenizer {
 
     public string Detokenize(LLMToken token);
 
-    public ReadOnlySpan<byte> DetokenizeUTF8(LLMToken token);
+    public ReadOnlySpan<byte> DetokenizeSpan(LLMToken token);
 }

@@ -25,7 +25,7 @@ internal class Program {
         LLama.SetLogCallback((v, x) => { });
 
         var inferencer = context.CreateInferencer(sampler);
-        var prompt = inferencer.Tokens;
+        var prompt = inferencer.Session;
         inferencer.AntiPrompt = "###";
 
         prompt.Append(" ", true);
@@ -44,7 +44,6 @@ internal class Program {
             var words = inferencer.InferenceText(500);
             foreach(var word in words) {
                 Console.Write(word.Replace("\r", "\r\n"));
-                File.AppendAllText("output.txt", word);
             }
             prompt.Append(InputPrefix);
             Console.Write(InputPrefix);

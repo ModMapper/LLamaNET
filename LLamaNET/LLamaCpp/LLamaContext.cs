@@ -102,7 +102,7 @@ public sealed class LLamaContext : ILLamaTokenizer, IDisposable {
         => Marshal.PtrToStringUTF8((nint)NativeFunctions.llama_token_to_str(handle, token)) ?? string.Empty;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public unsafe ReadOnlySpan<byte> DetokenizeUTF8(LLMToken token)
+    public unsafe ReadOnlySpan<byte> DetokenizeSpan(LLMToken token)
         => MemoryMarshal.CreateReadOnlySpanFromNullTerminated(NativeFunctions.llama_token_to_str(handle, token));
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

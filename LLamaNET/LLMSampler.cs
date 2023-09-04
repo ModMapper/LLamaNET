@@ -2,6 +2,7 @@
 
 using LLamaNET.LLamaCpp;
 
+/// <summary>토큰에 대한 샘플링을 하는 샘플러입니다.</summary>
 public abstract class LLMSampler {
     /// <summary>주어진 최근 토큰을 사용해 토큰을 샘플링합니다.</summary>
     /// <param name="LastToken">최근 사용되거나 입력된 토큰입니다.</param>

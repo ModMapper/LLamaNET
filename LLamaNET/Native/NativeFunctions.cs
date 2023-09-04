@@ -9,7 +9,7 @@ public static unsafe class NativeFunctions {
     /// <param name="log_callback">로그 출력시 실행 될 함수입니다.</param>
     /// <param name="user_data">함수에 전달할 값입니다.</param>
     [DllImport("llama")]
-    public static extern void llama_log_set(LLamaLogCallback log_callback, IntPtr user_data);
+    public static extern void llama_log_set(LLamaLogCallback? log_callback, IntPtr user_data);
 
     /// <summary>사용 가능한 디바이스 수를 가져옵니다.</summary>
     /// <returns>사용 가능한 디바이스 수 최대치 입니다. LLAMA_MAX_DEVICES값과 동일합니다.</returns>

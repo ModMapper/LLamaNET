@@ -1,7 +1,8 @@
 ﻿namespace LLamaNET;
 
-using LLamaNET.Context;
 using LLamaNET.LLamaCpp;
+using LLamaNET.Session;
+
 using System;
 using System.Runtime.CompilerServices;
 
@@ -21,17 +22,11 @@ public class LLMContext : IDisposable {
         GC.SuppressFinalize(this);
     }
 
-    /// <summary>내부 라마 컨텍스트입니다.</summary>
+    /// <summary>내부 컨텍스트입니다.</summary>
     protected LLamaContext Context { get; }
 
     /// <summary>연산을 진행할 배치 크기입니다.</summary>
     public int BatchSize { get; set; }
-
-    /// <summary>해당 컨텍스트에 대한 토크나이저를 가져옵니다.</summary>
-    /// <returns>컨텍스트에 대한 토크나이저입니다.</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public LLMTokenizer GetTokenizer()
-        => new(Context);
 
     /// <summary>해당 컨텍스트의 시드 값을 설정합니다.</summary>
     /// <param name="seed">설정할 시드 값입니다.</param>
@@ -39,18 +34,20 @@ public class LLMContext : IDisposable {
     public void SetRandomSeed(uint seed)
         => Context.SetRandomSeed(seed);
 
+    /// <summary>해당 컨텍스트에 대한 토크나이저를 가져옵니다.</summary>
+    /// <returns>컨텍스트에 대한 토크나이저입니다.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public LLMTokenizer GetTokenizer()
+        => new(Context);
 
-    /// <summary>새 토큰 추론기를 생성합니다.</summary>
-    /// <param name="sampler">토큰을 추론하는데 사용할 샘플러입니다.</param>
-    /// <returns>생성한 토큰 추론기입니다.</returns>
+    /// <summary>해당 컨텍스트에 대한 추론기를 생성합니다.</summary>
+    /// <param name="sampler">추론기를 샘플링 할 경우 사용할 샘플러입니다.</param>
+    /// <returns>해당 컨텍스트의 추론기입니다.</returns>
     public TextInferencer CreateInferencer(LLMSampler sampler)
-        => new(Context, sampler, BatchSize);
+        => new TextInferencer(new CircularSession(Context, BatchSize), sampler, BatchSize);
 
-
-    /// <summary>새 토큰 추론기를 생성합니다.</summary>
-    /// <param name="sampler">토큰을 추론하는데 사용할 샘플러입니다.</param>
-    /// <param name="tokens">토큰을 추론하는데 사용할 토큰 저장소입니다.</param>
-    /// <returns>생성한 토큰 추론기입니다.</returns>
-    public TextInferencer CreateInferencer(LLMSampler sampler, LLMTokens tokens)
-        => new(Context, sampler, tokens, BatchSize);
+    /// <summary>컨텍스트의 내부 컨텍스트를 가져옵니다.</summary>
+    /// <param name="context">내부 컨텍스트를 가져올 컨텍스트입니다.</param>
+    public static explicit operator LLamaContext(LLMContext context)
+        => context.Context;
 }

@@ -18,12 +18,19 @@ public abstract class PenaltySampler : LLMSampler {
     /// <summary>마지막 반복 검색 길이</summary>
     public int LastRepeatCount { get; set; } = 0;
 
+    /// <summary>개행 토큰에 대해 패널티를 적용할지 여부입니다.</summary>
+    public bool NLPenalty { get; set; }
+
     /// <summary>토큰 후보를 통해 최종 토큰을 샘플링합니다.</summary>
     /// <param name="candidates">토큰 후보입니다.</param>
     /// <returns>선별된 토큰입니다.</returns>
     public override void ApplyPenalty(ref LLamaCandidates candidates, ReadOnlySpan<LLMToken> tokens) {
+        float logit = candidates[LLMToken.TokenNL].logit;
+
         int repeat = Math.Min(Math.Min(tokens.Length, LastRepeatCount), candidates.Context.ContextSize);
         candidates.SampleRepetitionPenalty(tokens[..repeat], RepeatPenalty);
         candidates.SampleFrequencyAndPresencePenalties(tokens[..repeat], FrequencyPenalty, PresencePenalty);
+
+        if (!NLPenalty) candidates[LLMToken.TokenNL].logit = logit;
     }
 }
