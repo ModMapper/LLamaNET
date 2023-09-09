@@ -1,7 +1,8 @@
-﻿namespace LLamaNET.Session;
+﻿namespace LLamaNET;
 
 using LLamaNET.LLamaCpp;
 using LLamaNET.Sampler;
+using LLamaNET.Session;
 
 using System;
 using System.Collections.Generic;
