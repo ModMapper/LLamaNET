@@ -4,13 +4,13 @@
 
 ***Example***
 ```C#
+        const string prompt = "Hello, World!";
         LLamaParams param = new() {
             BatchSize = 512,
             ContextLength = 4096,
             GPULayerCount = 128,
         };
         using var model = LLMModel.FromFile("model.bin", param);
-        using var context = model.CreateContext();
         TopSampler sampler = new() {
             RepeatPenalty = 1.1f,
             PresencePenalty = 0f,
@@ -19,9 +19,9 @@
             TopP = 0.95f,
             Temperature = 0.8f,
         };
-        var inferencer = context.CreateInferencer(sampler);
-        inferencer.Session.Append(prompt);
-        foreach(var text in inferencer.InferenceText(500)) {
+        using var inferencer = model.CreateInferencer(sampler);
+        inferencer.Session.Write(prompt, true);
+        foreach (var text in inferencer.InferenceText(500)) {
             Console.Write(text.Replace("\r", "\r\n"));
         }
 ```

@@ -3,28 +3,37 @@
 using LLamaNET.LLamaCpp;
 
 using System;
+using System.IO;
+using System.Runtime.InteropServices;
 
 public class CircularSession : LLMSession {
     private readonly LLMToken[] buffer;
-    private readonly int buffersize;
     private readonly int contextsize;
     private int index;
 
-    public CircularSession(LLamaContext context, int buffersize) : base(context) {
-        if (buffersize < 0) throw new ArgumentOutOfRangeException(nameof(buffersize));
+    public CircularSession(LLMContext context) : this((LLamaContext)context, context.BatchSize) { }
+
+    public CircularSession(LLamaContext context, int batchSize) : base(context, batchSize, false) {
         contextsize = context.ContextSize;
-        this.buffersize = Math.Min(0x100, buffersize);
-        buffer = new LLMToken[contextsize + this.buffersize];
+        buffer = new LLMToken[contextsize + BatchSize];
+    }
+
+    public CircularSession(LLamaContext context, int batchSize, bool owned) : base(context, batchSize, owned) {
+        contextsize = context.ContextSize;
+        buffer = new LLMToken[contextsize + BatchSize];
     }
 
     public override int Length => Math.Min(index, contextsize);
 
-    protected override ReadOnlySpan<LLMToken> Span
+    public override ReadOnlySpan<LLMToken> Span
         => buffer.AsSpan()[Math.Max(index - contextsize, 0)..index];
+
+    public override ReadOnlyMemory<LLMToken> Memory
+        => buffer.AsMemory()[Math.Max(index - contextsize, 0)..index];
 
     public override void Add(LLMToken token) {
         if (index == buffer.Length) {
-            buffer.AsSpan(buffersize + 1).CopyTo(buffer);
+            buffer.AsSpan(BatchSize + 1).CopyTo(buffer);
             buffer[contextsize - 1] = token;
             index = contextsize;
         } else {
@@ -37,7 +46,7 @@ public class CircularSession : LLMSession {
             if (contextsize <= tokens.Length) {
                 tokens[^contextsize..].CopyTo(buffer);
             } else {
-                buffer.AsSpan(buffersize + tokens.Length).CopyTo(buffer);
+                buffer.AsSpan(BatchSize + tokens.Length).CopyTo(buffer);
                 tokens.CopyTo(buffer.AsSpan(contextsize - tokens.Length));
             }
             index = contextsize;
@@ -49,4 +58,10 @@ public class CircularSession : LLMSession {
 
     public override void Clear()
         => index = 0;
+
+    protected override void ReadTokens(Stream stream, int count)
+        => stream.ReadExactly(MemoryMarshal.AsBytes(buffer.AsSpan(0, index = count)));
+
+    protected override void WriteTokens(Stream stream)
+        => stream.Write(MemoryMarshal.AsBytes(buffer.AsSpan()[Math.Max(index - contextsize, 0)..index]));
 }

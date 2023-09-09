@@ -2,7 +2,7 @@
 
 using LLamaNET.Native;
 
-/// <summary>LLama</summary>
+/// <summary>LLama 전반에 대한 클래스입니다.</summary>
 public static class LLama {
     public delegate void LogCallback(LLamaLogLevel logLevel, string text);
     private static NativeFunctions.LLamaLogCallback? logcallback;

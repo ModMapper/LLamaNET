@@ -29,7 +29,7 @@ public class MirostatV2Sampler : PenaltySampler {
     /// <summary>토큰 후보를 통해 최종 토큰을 샘플링합니다.</summary>
     /// <param name="candidates">토큰 후보입니다.</param>
     /// <returns>선별된 토큰입니다.</returns>
-    public override LLMToken Sample(LLamaCandidates candidates) {
+    public override LLMToken Sample(ref LLamaCandidates candidates) {
         if (Temperature == 0) return candidates.SampleTokenGreedy();
         candidates.SampleTemperature(Temperature);
         return candidates.SampleTokenMirostatV2(Tau, Eta, mu);

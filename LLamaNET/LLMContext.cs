@@ -3,24 +3,25 @@
 using LLamaNET.LLamaCpp;
 using LLamaNET.Session;
 
-using System;
 using System.Runtime.CompilerServices;
 
 /// <summary>LLM 컨텍스트</summary>
 public class LLMContext : IDisposable {
+    /// <summary>컨텍스트와 파라미터로부터 새 컨텍스트를 생성합니다.</summary>
+    /// <param name="model">내부적으로 사용되는 라마 컨텍스트입니다.</param>
+    /// <param name="param">컨텍스트를 생성할 파라마터입니다.</param>
+    protected LLMContext(LLamaContext context, LLamaParams param)
+        => (Context, BatchSize) = (context, param.BatchSize);
+
     /// <summary>모델과 파라미터로부터 새 컨텍스트를 생성합니다.</summary>
     /// <param name="model">컨텍스트를 생성할 모델입니다.</param>
     /// <param name="param">컨텍스트를 생성할 파라마터입니다.</param>
-    public LLMContext(LLamaModel model, LLamaParams param) {
-        Context = new(model, param);
-        BatchSize = param.BatchSize;
-    }
+    public static LLMContext FromModel(LLMModel model, LLamaParams param)
+        => new(new((LLamaModel)model, param), param);
 
     /// <summary>해당 컨텍스트에 대한 리소스를 해제합니다.</summary>
-    public void Dispose() {
-        Context.Dispose();
-        GC.SuppressFinalize(this);
-    }
+    public void Dispose()
+        => Context.Dispose();
 
     /// <summary>내부 컨텍스트입니다.</summary>
     protected LLamaContext Context { get; }
@@ -40,11 +41,23 @@ public class LLMContext : IDisposable {
     public LLMTokenizer GetTokenizer()
         => new(Context);
 
-    /// <summary>해당 컨텍스트에 대한 추론기를 생성합니다.</summary>
-    /// <param name="sampler">추론기를 샘플링 할 경우 사용할 샘플러입니다.</param>
-    /// <returns>해당 컨텍스트의 추론기입니다.</returns>
+    /// <summary>해당 컨텍스트에 대한 세션을 생성합니다.</summary>
+    /// <returns>컨텍스트에 대한 세션입니다.</returns>
+    public LLMSession CreateSession()
+        => new CircularSession(Context, BatchSize);
+
+    /// <summary>해당 컨텍스트에 대한 세션을 생성합니다.</summary>
+    /// <param name="owned">해당 세션이 현재 컨텍스트를 소유할지 여부입니다.</param>
+    /// <returns>컨텍스트에 대한 세션입니다.</returns>
+    public LLMSession CreateSession(bool owned)
+        => new CircularSession(Context, BatchSize, owned);
+
+    /// <summary>해당 샘플러를 사용하는 추론기를 생성합니다.</summary>
+    /// <param name="sampler">추론에 사용할 샘플러입니다.</param>
+    /// <returns>새 추론기를 반환합니다.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public TextInferencer CreateInferencer(LLMSampler sampler)
-        => new TextInferencer(new CircularSession(Context, BatchSize), sampler, BatchSize);
+        => new(new CircularSession(Context, BatchSize, true), sampler);
 
     /// <summary>컨텍스트의 내부 컨텍스트를 가져옵니다.</summary>
     /// <param name="context">내부 컨텍스트를 가져올 컨텍스트입니다.</param>

@@ -26,9 +26,9 @@ public class GrammarSampler : LLMSampler {
     /// <summary>토큰 후보를 통해 최종 토큰을 샘플링합니다.</summary>
     /// <param name="candidates">토큰 후보입니다.</param>
     /// <returns>선별된 토큰입니다.</returns>
-    public override LLMToken Sample(LLamaCandidates candidates) {
+    public override LLMToken Sample(ref LLamaCandidates candidates) {
         candidates.SampleGrammar(Grammar);
-        LLMToken token = BaseSampler.Sample(candidates);
+        LLMToken token = BaseSampler.Sample(ref candidates);
         Grammar.AcceptToken(candidates.Context, token);
         return token;
     }
