@@ -26,8 +26,8 @@ public sealed class LLamaGrammar : IDisposable {
         GC.SuppressFinalize(this);
     }
 
-    internal LLamaGrammarHandle Handle => handle;
+    public LLamaGrammarHandle Handle => handle.Empty ? throw new ObjectDisposedException(nameof(LLamaGrammar)) : handle;
 
     public void AcceptToken(LLamaContext context, LLMToken token)
-        => NativeFunctions.llama_grammar_accept_token(context.Handle, handle, token);
+        => NativeFunctions.llama_grammar_accept_token(context.Handle, Handle, token);
 }

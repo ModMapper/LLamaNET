@@ -48,7 +48,7 @@ public readonly struct LLMTokenizer {
     /// <param name="bos">문단 시작 토큰의 추가 여부입니다.</param>
     /// <returns>텍스트에 대한 토큰 갯수입니다.</returns>
     public readonly int Calculate(string text, bool bos)
-        => -tokenizer.Tokenize(text, Span<LLMToken>.Empty, bos);
+        => Math.Abs(tokenizer.Tokenize(text, stackalloc LLMToken[0x1], bos));
 
     /// <summary>해당 토큰에 대한 문자열을 가져옵니다.</summary>
     /// <param name="token">문자열을 가져올 토큰입니다.</param>

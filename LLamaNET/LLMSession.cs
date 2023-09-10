@@ -85,7 +85,7 @@ public abstract class LLMSession : IDisposable {
     /// <param name="bos">시작 토큰의 추가 여부입니다.</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void Write(string text, bool bos) {
-        int size = -Context.Tokenize(text, Span<LLMToken>.Empty, bos);
+        int size = Math.Abs(Context.Tokenize(text, stackalloc LLMToken[0x1], bos));
         if (size <= 0x1000) {
             Span<LLMToken> buffer = stackalloc LLMToken[size];
             Context.Tokenize(text, buffer, bos);
