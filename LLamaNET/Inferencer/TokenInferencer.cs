@@ -9,8 +9,9 @@ using System.Threading;
 
 /// <summary>세션으로부터 토큰을 추론하는 토큰 추론기입니다.</summary>
 public partial class TokenInferencer : IEnumerable<LLMToken>, IAsyncEnumerable<LLMToken> {
-    private LLMToken token;
+    private InferenceState state;
     private int past, count;
+    private LLMToken token;
 
     /// <summary>새 토큰 추론기를 생성합니다.</summary>
     /// <param name="session">토큰 추론기를 생성할 세션입니다.</param>
@@ -46,6 +47,9 @@ public partial class TokenInferencer : IEnumerable<LLMToken>, IAsyncEnumerable<L
     /// <summary>계산된 토큰의 수 입니다.</summary>
     public int Count => count;
 
+    /// <summary>현재 추론기의 최종 상태입니다.</summary>
+    public InferenceState State => state;
+
     /// <summary>현재 추론한 토큰입니다.</summary>
     public LLMToken Token => token;
 
@@ -68,14 +72,14 @@ public partial class TokenInferencer : IEnumerable<LLMToken>, IAsyncEnumerable<L
     /// <returns>토큰 추론의 성공 여부입니다.</returns>
     public InferenceState NextToken() {
         if (token == LLMToken.TokenEOS)
-            return InferenceState.Stop;
+            return state = InferenceState.Stop;
         if (MaxTokens != 0 && MaxTokens <= count)
-            return InferenceState.Length;
+            return state = InferenceState.Length;
         token = Sampler.Sample(Context, Session.Span);
         Session.Add(token);
         Eval(token);
         count++;
-        return InferenceState.None;
+        return state = InferenceState.None;
     }
 
     /// <summary>주어진 토큰에 대한 계산을 실시합니다.</summary>

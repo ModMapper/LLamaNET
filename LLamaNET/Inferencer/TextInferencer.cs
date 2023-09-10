@@ -84,9 +84,9 @@ public partial class TextInferencer : IEnumerable<string>, IAsyncEnumerable<stri
         buffer.AsSpan(0, index).CopyTo(buf);
         index += decoder.GetChars(span, buf[index..], flush);
         if(AntiPrompt.Length < index) {
-            int last = index - AntiPrompt.Length;
-            if (char.IsLowSurrogate(buf[last]))
-                last--;
+            int last = index - buffer.Length;
+            if (!char.IsHighSurrogate(buf[last]))
+                last++;
             buf[last..index].CopyTo(buffer);
             index -= last; 
             return new(buf[..last]);
