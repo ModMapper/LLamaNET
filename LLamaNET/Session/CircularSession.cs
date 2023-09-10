@@ -59,6 +59,13 @@ public class CircularSession : LLMSession {
     public override void Clear()
         => index = 0;
 
+    public override void Cutoff(int count) {
+        if (count < 0) throw new ArgumentOutOfRangeException(nameof(count));
+        if (index < count) return;
+        Span.CopyTo(buffer);
+        index = count;
+    }
+
     protected override void ReadTokens(Stream stream, int count)
         => stream.ReadExactly(MemoryMarshal.AsBytes(buffer.AsSpan(0, index = count)));
 

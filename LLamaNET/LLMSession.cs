@@ -53,6 +53,9 @@ public abstract class LLMSession : IDisposable {
     /// <summary>현재 세션의 토큰 갯수를 가져옵니다.</summary>
     public abstract int Length { get; }
 
+    /// <summary>해당 세션의 최대 콘텍스트 길이를 가져옵니다.</summary>
+    public int ContextSize => Context.ContextSize;
+
     /// <summary>세션에 토큰을 추가합니다.</summary>
     /// <param name="token">세션에 추가할 토큰입니다.</param>
     public abstract void Add(LLMToken token);
@@ -73,6 +76,10 @@ public abstract class LLMSession : IDisposable {
 
     /// <summary>세션에 저장된 토큰을 삭제합니다.</summary>
     public abstract void Clear();
+
+    /// <summary>주어진 크기가 남도록 앞부분을 자릅니다.</summary>
+    /// <param name="count">남길 크기입니다.</param>
+    public abstract void Cutoff(int count);
 
     /// <summary>세션에 텍스트를 작성합니다.</summary>
     /// <param name="text">세션에 작성할 텍스트입니다.</param>
