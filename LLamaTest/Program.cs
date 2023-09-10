@@ -47,7 +47,7 @@ internal class Program {
             prompt.Write(OutputPrefix);
             Console.Write(OutputPrefix);
 
-            foreach (var word in inferencer.InferenceText(500)) {
+            foreach (var word in inferencer.InferenceText("###", 500)) {
                 Console.Write(word.Replace("\r", "\r\n"));
             }
             prompt.Write(InputPrefix);

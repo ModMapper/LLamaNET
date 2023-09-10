@@ -56,7 +56,7 @@ public class LLMContext : IDisposable {
     /// <param name="sampler">추론에 사용할 샘플러입니다.</param>
     /// <returns>새 추론기를 반환합니다.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public TextInferencer CreateInferencer(LLMSampler sampler)
+    public LLMInferencer CreateInferencer(LLMSampler sampler)
         => new(new CircularSession(Context, BatchSize, true), sampler);
 
     /// <summary>컨텍스트의 내부 컨텍스트를 가져옵니다.</summary>

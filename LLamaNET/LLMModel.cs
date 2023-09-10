@@ -65,7 +65,7 @@ public class LLMModel : IDisposable {
     /// <param name="sampler">추론에 사용할 샘플러입니다.</param>
     /// <returns>새 추론기를 반환합니다.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public TextInferencer CreateInferencer(LLMSampler sampler)
+    public LLMInferencer CreateInferencer(LLMSampler sampler)
         => new(new CircularSession(new(Model, Param), Param.BatchSize, true), sampler);
 
 
