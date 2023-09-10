@@ -94,28 +94,6 @@ public partial class TextInferencer : IEnumerable<string>, IAsyncEnumerable<stri
             buf[..index].CopyTo(buffer);
             return string.Empty;
         }
-
-        /*
-
-
-        int count = 0x100; // decoder.GetCharCount(span, flush);
-        if (count == 0) return string.Empty;
-        if (AntiPrompt.Length < index + count) {
-            Span<char> buf = stackalloc char[index + count];
-            buffer.AsSpan(0, index).CopyTo(buf);
-            decoder.GetChars(span, buf[index..], flush);
-            count = buf.Length - buffer.Length;
-            if (!char.IsHighSurrogate(buf[count]))
-                count++;
-            buf[count..].CopyTo(buffer);
-            index = buf.Length - count;
-            return new(buf[..count]);
-        } else {
-            decoder.GetChars(span, buffer.AsSpan(index), flush);
-            index += count;
-            return string.Empty;
-        }
-        */
     }
 
     /// <summary>텍스트 추론기을 열거자 형태로 반환합니다.</summary>
